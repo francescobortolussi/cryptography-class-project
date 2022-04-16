@@ -75,10 +75,32 @@ class FingerPrintAnalyzer:
 
         return "".join(map(str, feature_vector)), number_of_features
 
-    def apply_transformation(self, fp):
-        Original_Image = Image.open(f"{fp}.jpg")
+    def apply_transformation(self):
+        # TEMPORARY IMPLEMENTATION
+        Original_Image = Image.open(f"data/DB1_B/101_1.tif")
+
+        rotated_image1 = Original_Image.rotate(1)
+        rotated_image1.save(f"data/DB1_B/101_r_1.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(2)
+        rotated_image1.save(f"data/DB1_B/101_r_2.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(5)
+        rotated_image1.save(f"data/DB1_B/101_r_3.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(10)
+        rotated_image1.save(f"data/DB1_B/101_r_4.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(12)
+        rotated_image1.save(f"data/DB1_B/101_r_5.tif", quality=100, subsampling=0)
         rotated_image1 = Original_Image.rotate(15)
-        rotated_image1.save(f"rotated_{fp}.jpg", quality=100, subsampling=0)
+        rotated_image1.save(f"data/DB1_B/101_r_6.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(18)
+        rotated_image1.save(f"data/DB1_B/101_r_7.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(20)
+        rotated_image1.save(f"data/DB1_B/101_r_8.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(25)
+        rotated_image1.save(f"data/DB1_B/101_r_9.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(30)
+        rotated_image1.save(f"data/DB1_B/101_r_10.tif", quality=100, subsampling=0)
+        rotated_image1 = Original_Image.rotate(35)
+        rotated_image1.save(f"data/DB1_B/101_r_11.tif", quality=100, subsampling=0)
 
     def __compare_pair_of_fingerprints(self, fp1, fp2):
         # img1 = cv2.imread(fp1, 0)
@@ -98,15 +120,15 @@ class FingerPrintAnalyzer:
         for fp in items_db:
             label = f"{fp.split('/')[2].split('_')[0]}_{fp.split('/')[2].split('_')[1]}"
             self.fingerprints.append([fp, label])
-
+        self.fingerprints.sort()
         with open("data/features_dict.json", 'r') as f:
             self.fp_features = json.load(f)
 
-    def __calculate_hamming_distances(self):
+    def __calculate_hamming_distances_all_pairs(self):
         hamming_distances_same_fp = []
         hamming_distances_different_fp = []
         counter = 0
-        number_of_steps = 15
+        number_of_steps = 100
         for i in range(number_of_steps-1):
             for j in range(i+1, number_of_steps):
                 counter += 1
@@ -119,24 +141,44 @@ class FingerPrintAnalyzer:
                     hamming_distances_different_fp.append(hamming_distance)
         return hamming_distances_same_fp, hamming_distances_different_fp
 
-    def plot_histogram(self, hd_same_fp, hd_diff_fp):
+    def __calculate_hamming_distances(self):
+        hamming_distances_same_fp = []
+        hamming_distances_different_fp = []
+        counter = 0
+        number_of_steps = len(self.fingerprints)
+        for i in range(1, number_of_steps):
+            counter += 1
+            print(f"Step: {counter} of {number_of_steps} - Comparing {self.fingerprints[0][1]} and {self.fingerprints[i][1]}")
+            comparison_bool = self.fingerprints[0][1] == self.fingerprints[i][1]
+            hamming_distance = self.__compare_pair_of_fingerprints(self.fingerprints[0][0], self.fingerprints[i][0])
+            if comparison_bool:
+                hamming_distances_same_fp.append(hamming_distance)
+            else:
+                hamming_distances_different_fp.append(hamming_distance)
+        return hamming_distances_same_fp, hamming_distances_different_fp
+
+    def __plot_histogram(self, hd_same_fp, hd_diff_fp):
         n, bins, patches = plt.hist(x=hd_same_fp, bins='auto', color='#0504aa',
                                     alpha=0.7, rwidth=0.85)
         n_1, bins_1, patches_1 = plt.hist(x=hd_diff_fp, bins='auto', color='#FF0000',
                                     alpha=0.7, rwidth=0.85)
-        plt.xlim(0, 1)
+        plt.xlim(0, 0.2)
         plt.show()
 
     def analyze_fingerprints(self):
         hamming_distances_same_fp, hamming_distances_different_fp = self.__calculate_hamming_distances()
-        self.plot_histogram(hamming_distances_same_fp, hamming_distances_different_fp)
+        self.__plot_histogram(hamming_distances_same_fp, hamming_distances_different_fp)
 
     def __load_raw_images(self):
+        items_db1_rotated = glob.glob("data/DB1_B_rotated/*")
         items_db1 = glob.glob("data/DB1_B/*")
         items_db2 = glob.glob("data/DB2_B/*")
         items_db3 = glob.glob("data/DB3_B/*")
         items_db4 = glob.glob("data/DB4_B/*")
 
+        for fp in items_db1_rotated:
+            label = f"{fp.split('/')[1]}-{fp.split('/')[2].split('_')[0]}"
+            self.fingerprints.append([fp, label])
         for fp in items_db1:
             label = f"{fp.split('/')[1]}-{fp.split('/')[2].split('_')[0]}"
             self.fingerprints.append([fp, label])
@@ -200,8 +242,12 @@ class FingerPrintAnalyzer:
 
 if __name__ == '__main__':
     fp = FingerPrintAnalyzer()
-    # fp.initialize_fingerprints_labels()
+
+    # analyze the fingerprints against each other
+    fp.initialize_fingerprints_labels()
+    fp.analyze_fingerprints()
+
+    # ONE TIME RUN
+    # fp.apply_transformation()
     # fp.enhance_and_save_images()
-    fp.precalculate_features()
-    # fp.analyze_fingerprints()
-    
+    # fp.precalculate_features()
