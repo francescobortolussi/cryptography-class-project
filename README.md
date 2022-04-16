@@ -58,7 +58,7 @@ After running the algorithm when focusing on comparing the fingerprint "data/DB1
 ![results](img/results.png)
 
 The red bars indicate how many samples had a different label, and the blue bars indicate the same fingerprint with different transformations.
-The results are not great but they're also only preliminar.
+The results are not great but they're also only preliminary.
 
 ## References
 1. A fingerprint based crypto-biometric system for secure communication (2018)
