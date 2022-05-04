@@ -52,13 +52,13 @@ How to run the script:
 
 Some other functions are private and only serve internal processing purposes (all the functions with the prefix "__").
 
-## Some preliminary results
+## Results
 After running the algorithm when focusing on comparing the fingerprint "data/DB1_B/101_1.tif" to all the others, it shows the following histogram of (percentage) hamming distances:
 
 ![results](img/results.png)
 
 The red bars indicate how many samples had a different label, and the blue bars indicate the same fingerprint with different transformations.
-The results are not great but they're also only preliminary.
+
 
 ## References
 1. A fingerprint based crypto-biometric system for secure communication (2018)
